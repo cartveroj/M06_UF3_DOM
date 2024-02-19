@@ -16,8 +16,8 @@ let preview = document.querySelector('#preview');
 //variable que contiene los eventos 
 let eventos =["dragover", "dragleave", "drop"];
 
-// const form = document.querySelector("form");
-
+const form = document.querySelector("form");
+const files = document.querySelector('#input-file');
 
 eventos.forEach(event => {
     dropArea.addEventListener(event, preventDefault);
@@ -110,12 +110,12 @@ function preventDefault(event){
 
 /*Opcional */
 
-// form.addEventListener("submit", function(e){
-//     e.preventDefault();
-//     const dataTransfer = new DataTransfer();
-//     arrayArchivos.forEach(file=>{
-//     dataTransfer.items.add(file);
-//     })
-//     input.files = dataTransfer.files;
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+    const dataTransfer = new DataTransfer();
+    arrayArchivos.forEach(file=>{
+    dataTransfer.items.add(file);
+    })
+    input.files = dataTransfer.files;
     
-//     });
+    });

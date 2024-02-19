@@ -11,16 +11,16 @@
 </head>
 <body>
 <h1>Ejercicio Drag & Drop</h1>
-<!-- <form id="form" action="archivo.php" method="post" enctype="multipart/form-data"></form> -->
+ <form id="form" action="archivo.php" method="post" enctype="multipart/form-data"></form> 
     <div class="container">
         <div class="drop-area" draggable="true">
         <h2>Drag & Drop files</h2>
         <button >Upload files</button>
-        <input type="file" name="inputFiles" id="input-file" hidden multiple />  
+        <input type="file" name="inputFiles[]" id="input-file" hidden multiple />  
         </div>
     </div>
    
-<!-- </form>  -->
+</form> 
     <div id="preview"></div>
     
    <script src="js/script.js"></script>
