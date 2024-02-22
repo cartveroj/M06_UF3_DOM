@@ -1,0 +1,12 @@
+input:invalid {
+    border: 2px dashed rgb(234, 168, 168);
+  }
+  
+  /* input:invalid:required {
+    background-color: rgb(200, 199, 201) ;
+  } */
+  
+  input:valid {
+    border: 2px solid rgb(165, 214, 163);
+  }
+  
