@@ -1,12 +1,56 @@
-input:invalid {
-    border: 2px dashed rgb(234, 168, 168);
-  }
-  
-  /* input:invalid:required {
-    background-color: rgb(200, 199, 201) ;
-  } */
-  
-  input:valid {
-    border: 2px solid rgb(165, 214, 163);
-  }
-  
+/* Estilos del formulario  */
+
+.form-control.is-invalid{
+  border-color: red;
+}
+
+.form-control.is-valid{
+  border-color: green;
+}
+.form-control {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 2px;
+}
+
+.alert.is-invalid{
+  position: relative;
+  left: 10px;
+  top: 10px;
+  color: red;
+}
+
+.text-control.invalid {
+  color: red;
+}
+.text-control.valid {
+  color: green;
+}
+
+span{
+  color: red;
+  font-size: small;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+div {
+  margin-bottom: 10px; 
+}
+label {
+  display: inline-block;
+  width: 150px; 
+  margin-right: 10px;
+}
+input, span{
+  width: 200px; /* Ancho de los campos de entrada, mensajes de error y botón de envío */
+}
+input[type="submit"] {
+  width: 100px;
+  margin-top: 5px;
+  margin-left: 220px;
+  position: relative; /* Espacio entre el último campo y el botón de envío */
+}
+
