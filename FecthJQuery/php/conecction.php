@@ -1,6 +1,6 @@
 <?php
 
-//Coneccion
+//Coneccion a la base de datos
 
 $coneccion = new mysqli("localhost", "veronica", "pirineus", "m06_dom");
 if ($coneccion->connect_errno) {

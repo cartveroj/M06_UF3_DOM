@@ -1,5 +1,7 @@
 <?php 
-
+    /*Logica de php que retorna los valores de la tabla subcategoria
+    segun la id de la categoria enviada
+    */
     include("conecction.php");
     $idCat = $_POST['cat'];;
     $subCat = " SELECT * FROM `sub_categoria` WHERE `idCategoria`= $idCat";
