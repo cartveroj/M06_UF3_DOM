@@ -8,13 +8,20 @@
     <title>Google Maps</title>
 </head>
 <body>
+    <h1>Práctica Google Maps</h1>
     <div id="map"></div>
-    <input type="text" name="adreca" value="Carrer de la Selva de Mar 211 08020 Barcelona" id="adreca"/>
-    <button type="button" class="btn btn-secondary" id="findLoc">Buscar adreça</button>
-    <input type="hidden" name="lat" value="" id="latitude"/>
-    <input type="hidden" name="lng" value="" id="longitude"/>
-
-
+    <div id="containerAdreca">
+        <input type="text" name="adreca" value="Carrer de la Selva de Mar 211 08020 Barcelona" id="adreca"/>
+        <button type="button" class="btn btn-secondary" id="findLoc">Buscar adreça</button>
+        <div class="lat-long">
+            <input  disabled name="lat" value="" id="latitude"/>
+            <input  disabled name="lng" value="" id="longitude"/>
+        </div>
+        
+    </div>
+   
+    <button id="geo">ubicacion actual</button>
+    <div id="mensaje"></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwEQr8flR0CtMZ-
     jSs9hK8lscYUMOtVPk&callback=initMap" async defer></script>
     <script src="js/script.js"></script>
