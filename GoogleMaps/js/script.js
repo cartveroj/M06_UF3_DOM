@@ -1,17 +1,21 @@
+/*Archivo que contiene la logica de js para ejecutar el maps */
 
+//variables globales
 let buscar = document.getElementById("findLoc");
 let Ilatitude = document.getElementById("latitude");
 let Ilongitude = document.getElementById("longitude");
 let btn = document.getElementById("geo");
 let btnInit = document.getElementById("initMap");
 let mensaje = document.getElementById("mensaje");
+//contiene la latitud y longitud por defecto
 
+let deflat= 41.390205;
+let deflng= 2.154007;
 let map;
 //funcion que inicia el mapa 
 async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
-  let deflat= 41.390205;
-  let deflng= 2.154007;
+
   const myLatLng = { lat: deflat, lng: deflng };
   map = new Map(document.getElementById("map"), {
     center: myLatLng,
@@ -20,9 +24,12 @@ async function initMap() {
 
   addMarker(myLatLng);
 }
-initMap();
 
+initMap();
+//Listener que al hacer click realiza la busqueda de la direccion introducida
+//si no la encuentra muestra un mensaje
 buscar.addEventListener('click', function(){
+        //vaciamos los valores de los coordenadas
         Ilatitude.value = " ";
         Ilongitude.value = " ";
         let p = document.getElementById('text');
@@ -57,7 +64,7 @@ buscar.addEventListener('click', function(){
         });
     });
  
-
+//Funcion que recibe coordenadas para buscar en el maps
 async function ubicacionEnMaps(latitude,longitude) {
   const { Map } = await google.maps.importLibrary("maps");
   const myLatLng = { lat: latitude, lng: longitude };
@@ -69,9 +76,10 @@ async function ubicacionEnMaps(latitude,longitude) {
   addMarker(myLatLng);
   
 }
-
+//listener que ejecuta la funcion geolocalizacion en el momento que hace click al boton
 btn.addEventListener('click',geolocalizacion);
 
+//funcion que te indica la ubicacion donde se encuentra el usuario
 function geolocalizacion(){
   const image = {
     url:'img/persona.png',
@@ -94,8 +102,7 @@ function geolocalizacion(){
   }
 }
 
-btnInit.addEventListener('click',initMap);
-
+//funcion que se encarga de añadir marKer (icono)
 function addMarker(position){
   const label = new google.maps.Marker({
     position,

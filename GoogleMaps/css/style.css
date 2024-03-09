@@ -23,10 +23,10 @@
     width: 300px;
     }
 .lat-long {
-  display: flex; /* Makes the inputs sit horizontally */
-  margin-top: 10px; /* Adds space between the address and latitude/longitude inputs */
+  display: flex; 
+  margin-top: 10px; 
 }
 
 .lat-long input {
-  margin-right: 10px; /* Adds space between the latitude and longitude inputs */
+  margin-right: 10px; 
 }
