@@ -6,6 +6,7 @@
         }
 
     if(isset($_POST["nomProducte"]) && !empty($_POST["nomProducte"])){
+        
         if($_POST["addEdit"]==0){
             $sql = "INSERT INTO products (nom) VALUES ('" . $_POST["nomProducte"] ."')";
         }else{

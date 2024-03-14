@@ -37,11 +37,12 @@ $conn->close();
         <div class="col">
             <h2 class="mb-3">Formulari</h2>
 
-            <form action="ex2AddEdit.php" method="POST">
+            <form action="ex2AddEdit.php" method="POST" id="myForm">
                 <div class="form-group mb-2">
                     <input type="text" class="form-control" id="nomProducte" name="nomProducte" placeholder="Nom" value="">
                 </div>
-                
+
+                <input type="hidden" name="accion" id="accion" value="">
                 <input type="hidden" name="addEdit" id="addEdit" value="0"/>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form> 
@@ -49,13 +50,14 @@ $conn->close();
         <div class="col">
             <h2 class="mb-3">Llistat</h2>
 
-            <table class="table">
+            <table class="table" >
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Nom</th>
                         <th scope="col">Edit</th>
                         <th scope="col">Remove</th>
+                        <th scope="col">Upload img</th>
                     </tr>
                 </thead>
                 
@@ -66,7 +68,7 @@ $conn->close();
                                         <th scope="row">' . $array[$i]["id"] . '</th>
                                         <td>' . $array[$i]["nom"] . '</td>
                                         <td><p idProd="' . $array[$i]["id"] . '" class="btnEdit btn btn-outline-info">Edit</p></td>
-                                        <td><a href="ex2remove.php?id=' .$array[$i]["id"]. '" class="btnRemove btn btn-outline-danger">Remove</a></td>
+                                        <td><p idProd="' .$array[$i]["id"]. '" class="btnRemove btn btn-outline-danger">Remove</p></td>
                                     </tr>';
                         }  
                     ?>
@@ -77,6 +79,9 @@ $conn->close();
 
     <script>
         let btnEdit = document.querySelectorAll(".btnEdit");
+        let btnRemove =document.querySelectorAll(".btnRemove");
+        
+
         btnEdit.forEach(el=>{
             el.addEventListener("click", function(){
 
@@ -91,14 +96,25 @@ $conn->close();
                 fetch("getProducte.php", options)
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data);
                     document.getElementById("nomProducte").value = data.nom;
                     document.getElementById("addEdit").value = data.addEdit;
                 })
                 .catch((error) => {});
 
             })
-        })
+        });
+         //Listener que por cada click en el boton eliminar 
+         //asignamos el valor a la accion
+         //y lo enviamos por el form 
+        btnRemove.forEach(el=>{
+            el.addEventListener("click", function(){
+            let form = document.getElementById('myForm');
+            document.getElementById("accion").value = "remove"; //se añade el value al input para poder filtrar en el archivo.php
+            document.getElementById("addEdit").value = this.getAttribute("idProd");
+            form.submit();    
+            })
+            
+        });
     </script>
 </body>
 </html>
