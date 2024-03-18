@@ -69,6 +69,10 @@ $conn->close();
                                         <td>' . $array[$i]["nom"] . '</td>
                                         <td><p idProd="' . $array[$i]["id"] . '" class="btnEdit btn btn-outline-info">Edit</p></td>
                                         <td><p idProd="' .$array[$i]["id"]. '" class="btnRemove btn btn-outline-danger">Remove</p></td>
+                                        <td><p idImg="' .$array[$i]["id"]. '" class="btnAddImg btn btn btn-outline-info">Add img</p></td>
+                                        <input type="file" name="inputFiles[]" id="input-file-' .$array[$i]["id"]. '" hidden multiple />  
+                                        <td><div id="preview-' .$array[$i]["id"]. '"></div></td>
+
                                     </tr>';
                         }  
                     ?>
@@ -78,9 +82,10 @@ $conn->close();
     </div>
 
     <script>
+
         let btnEdit = document.querySelectorAll(".btnEdit");
         let btnRemove =document.querySelectorAll(".btnRemove");
-        
+        let btnAddImg =document.querySelectorAll(".btnAddImg");
 
         btnEdit.forEach(el=>{
             el.addEventListener("click", function(){
@@ -106,15 +111,84 @@ $conn->close();
          //Listener que por cada click en el boton eliminar 
          //asignamos el valor a la accion
          //y lo enviamos por el form 
+         let form = document.getElementById('myForm');
         btnRemove.forEach(el=>{
             el.addEventListener("click", function(){
-            let form = document.getElementById('myForm');
+           
             document.getElementById("accion").value = "remove"; //se añade el value al input para poder filtrar en el archivo.php
             document.getElementById("addEdit").value = this.getAttribute("idProd");
             form.submit();    
             })
             
         });
+        
+        btnAddImg.forEach(el=>{
+            el.addEventListener("click", function(e){
+
+                let id = this.getAttribute("idImg")
+                let input = document.getElementById("input-file-"+id);
+                let previewItem = document.getElementById("preview-"+id);
+
+                console.log(input)
+                e.preventDefault();
+                input.click();
+                input.addEventListener("change", function(){
+                
+                let arrayArchivos = Array.from(input.files);
+                console.log(arrayArchivos);
+                showFiles(arrayArchivos, previewItem);
+               // form.submit();
+            });
+
+
+            })
+            
+        });
+        
+      //Funcion que se encarga de gestionar el arrayDeArchivos
+        function showFiles(arrayArchivos, previewItem){
+            if(arrayArchivos.length != 0){
+                previewItem.innerHTML = ""; //limpiamos las imagenes previas para mostrar la lista nueva
+                arrayArchivos.forEach((file, index)=>{
+                    processFile(file,index, previewItem)
+                });
+                console.log(arrayArchivos);
+            }
+        }
+
+        //funcion que se encarga de procesar el file, verificando la extension
+    //y carga la imagen en el navegador
+    function processFile( file, index, previewItem){
+        const validExtensions = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+        const docType = file.type;
+        //verificamos la extension 
+        if(!validExtensions.includes(docType)){
+            alert("Extensió no vàlida: " + file.name);
+            arrayArchivos.splice(index,1);
+            return;
+        }
+    //instanciamos objeto FileReader que permite leer el contenido de files
+        let reader = new FileReader();
+        let prev ="";
+        reader.onload = function () {
+            prev += `<div class="previewImage">
+                <img src="${reader.result}" width="180" height="90"/>
+                <span class="fileName">${file.name}</span>
+                <button onclick="remove(${index})" class="material-symbols-outlined removeBtn">close</button>
+                </div>
+            `;
+            previewItem.innerHTML += prev;
+            };
+        reader.readAsDataURL(file);
+    }
+
+    function remove(index){
+    let divToRemove = preview.children[index];
+    preview.removeChild(divToRemove);
+    console.log(arrayArchivos);
+    arrayArchivos.splice(index,1);
+    showFiles();
+    }
     </script>
 </body>
 </html>
