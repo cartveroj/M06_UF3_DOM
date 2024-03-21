@@ -58,7 +58,7 @@
 				<div class="col-4">
 					<label for="validationEmail">Email*</label>
 					<input type="email" class="form-control" id="validationEmail">
-					<div id="feedbakEmail">
+					<div id="feedbackEmail">
 
 					</div>
 				</div>

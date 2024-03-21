@@ -6,10 +6,13 @@ inputs.forEach((element)=>{
   if(element.type != "submit"){
       switch (element.id){
           case "validationEmail" :
-            validateEmail(element); // validamos el email
+            validarElemento(element, validateEmail) // validamos el email
           break;
           case "validationDNI":
-            validadorDNI_NIE(element); //validamos la contraseña
+            validarElemento(element, validateNIF_NIE) 
+          break;
+          case "validationTelf":
+            validarElemento(element, validateTelefono)
           break;
           default:
               validacionGeneral(element); // verficacion de los demas inputs que no tienen verificaciones especificas
@@ -22,6 +25,28 @@ inputs.forEach((element)=>{
 
   });
 
+
+  $('#btnUsername').on('click', () => {
+    let nom = $('#validationNom').val();
+    let cognom = $('#validationCognoms').val();
+    let dniNie = $('#validationDNI').val();
+    let userName = document.getElementById('validationUsername');
+    let respuesta = "";
+    if(nom != '' && cognom!= '' && dniNie != ''){
+      let primeraLetraNom = nom.slice(0,1);
+       respuesta += primeraLetraNom.toLowerCase();
+       let apellidosSinEspacio = cognom.replace(' ','').toLowerCase();
+       let primeraLetraApellido = apellidosSinEspacio.slice(0,1).toUpperCase();
+       let restoLetrasApellido = apellidosSinEspacio.slice(1,4);
+       respuesta += primeraLetraApellido;
+       respuesta += restoLetrasApellido;
+       let primerValorDniNie = dniNie.slice(0,1);
+       respuesta += primerValorDniNie.toLowerCase();
+       let restoValoresDniNie = dniNie.slice(1,4);
+       respuesta += restoValoresDniNie;
+       userName.value = respuesta;
+    }
+  });
   function validacionGeneral(element){
     console.log(element.id)
     var id = element.id;
@@ -60,33 +85,49 @@ inputs.forEach((element)=>{
 }
 //funcion que verifica por cada elemento y una funcion especifica
 function validarElemento(elemento, validador) {
-  var id = element.id;
+  var id = elemento.id;
   let div = id;
   let result = div.replace(/validation/, ""); 
   let divFeedback = document.getElementById(`feedback${result}`);
   let mensaje = "Este campo no puede estar vacio";
-  elemento.addEventListener('focusout', () => {
-      if (elemento.value === '' || !validador(elemento.value)) {
-          elemento.classList.remove('is-valid');
-          elemento.classList.add('is-invalid');
-          span.removeAttribute('hidden');
-      } else {
-          elemento.classList.remove('is-invalid');
-          elemento.classList.add('is-valid');
-          span.setAttribute('hidden', true);
-      }
-  });
 
+  elemento.addEventListener('focusout', () => {
+    if (elemento.value === '') {
+      divFeedback.innerHTML = mensaje;
+      divFeedback.classList.add('invalid-feedback'); 
+      elemento.classList.add('is-invalid');
+      return;
+    }
+  
+    if (!validador(elemento.value)) {
+      divFeedback.innerHTML = "Error: revise el valor introducido";
+      divFeedback.classList.add('invalid-feedback'); 
+      elemento.classList.add('is-invalid');
+    } else {
+      elemento.classList.remove('is-invalid');
+      elemento.classList.add('is-valid');
+      divFeedback.innerHTML = "";
+    }
+  });
+  
   elemento.addEventListener('input', () => {
-      if (elemento.value === '' || !validador(elemento.value)) {
-          elemento.classList.remove('is-valid');
-          elemento.classList.add('is-invalid');
-          span.removeAttribute('hidden');
-      } else {
-          elemento.classList.remove('is-invalid');
-          elemento.classList.add('is-valid');
-          span.setAttribute('hidden', true);
-      }
+    if (elemento.value === '') {
+      divFeedback.innerHTML = mensaje;
+      divFeedback.classList.add('invalid-feedback'); 
+      elemento.classList.add('is-invalid');
+      return;
+    }
+  
+    if (!validador(elemento.value)) {
+      divFeedback.innerHTML = "Error: revise el valor introducido";
+      elemento.classList.add('is-invalid');
+      divFeedback.classList.add('invalid-feedback'); 
+    } else {
+      elemento.classList.remove('is-invalid');
+      elemento.classList.add('is-valid');
+      divFeedback.innerHTML = "";
+      divFeedback.classList.remove('invalid-feedback'); 
+    }
   });
 }
   function validateNIF_NIE(value){
@@ -111,11 +152,9 @@ function validarElemento(elemento, validador) {
   }
 
 
-function validateEmail(mail) {
-  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
-    alert("OK");
-  }else{
-    alert("KO");
-  }
+function validateEmail(mail) {   
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail);
 }
-
+function validateTelefono(telefono){
+  return /^\d{9}$/.test(telefono)
+}
