@@ -1,4 +1,8 @@
   let inputs = document.querySelectorAll("input");
+  let mensajeVacio = "Este campo no puede estar vacio";
+  let mensajeError = "Error: revise el valor introducido"
+  let esValido=true;
+  let tipoError="";
   console.log(inputs);
 
   /*Realiza diversas verficaciones mientras el usuario ingresa los datos en cada input */
@@ -19,114 +23,160 @@ inputs.forEach((element)=>{
       }
   }
 });
+function addClassValidInvalidInputs(element, esValid,tipoMensaje){
+
+  if(esValid){
+    element.classList.remove('is-invalid');
+    element.classList.add('is-valid');
+    addClassFeedback(element,esValido)
+  }else{
+    element.classList.remove('is-valid');
+    element.classList.add('is-invalid');
+    
+    if(tipoMensaje == "vacio"){
+      addClassFeedback(element,!esValido,tipoMensaje)
+    }else if(tipoMensaje == "errorData"){
+      addClassFeedback(element,!esValido,tipoMensaje)
+    }
+    
+    
+  }
+}
+
+function addClassFeedback(element,esValid,tipoMensaje){
+ // console.log(element)
+  let id = element.id;
+  let div = id;
+  let result = div.replace(/validation/, ""); 
+  let divFeedback = document.getElementById(`feedback${result}`);
+//console.log(divFeedback)
+  if(esValid){
+    divFeedback.innerHTML = "";
+    divFeedback.classList.remove('invalid-feedback');
+  }else{
+    divFeedback.classList.add('invalid-feedback');
+    switch (tipoMensaje){
+      case "vacio":
+           divFeedback.innerHTML = mensajeVacio;
+      break;
+      case "errorData":
+            divFeedback.innerHTML = mensajeError;
+      break;
+    }
+  }
+  
+}
   $('#form-user-register').submit(function(e) {
     e.preventDefault();
-    console.log(e);
+
+    inputs.forEach(element  => {
+      if(element.type != "submit"){
+          if (element.value === '') {
+              addClassValidInvalidInputs(element,!esValido,tipoError="vacio");
+          } else {
+              addClassValidInvalidInputs(element,esValido);
+              switch (element.id){
+                case "validationEmail" :
+                  (validateEmail(element.value))
+                  ?addClassValidInvalidInputs(element,esValido)
+                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                break;
+                case "validationDNI":
+                  (validateNIF_NIE(element.value))
+                  ?addClassValidInvalidInputs(element,esValido)
+                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                break;
+                case "validationTelf":
+                  (validateTelefono(element.value))
+                  ?addClassValidInvalidInputs(element,esValido)
+                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                break;
+            }
+          }
+      }
+    });
 
   });
 
+  $('#btnUsername').on('mouseover', () => {
+    $('#btnUsername').css('cursor', 'pointer');
+  });
 
   $('#btnUsername').on('click', () => {
+
     let nom = $('#validationNom').val();
     let cognom = $('#validationCognoms').val();
     let dniNie = $('#validationDNI').val();
     let userName = document.getElementById('validationUsername');
     let respuesta = "";
+
     if(nom != '' && cognom!= '' && dniNie != ''){
-      let primeraLetraNom = nom.slice(0,1);
-       respuesta += primeraLetraNom.toLowerCase();
+
+       respuesta += primeraLetra(nom).toLowerCase();
        let apellidosSinEspacio = cognom.replace(' ','').toLowerCase();
-       let primeraLetraApellido = apellidosSinEspacio.slice(0,1).toUpperCase();
-       let restoLetrasApellido = apellidosSinEspacio.slice(1,4);
-       respuesta += primeraLetraApellido;
-       respuesta += restoLetrasApellido;
-       let primerValorDniNie = dniNie.slice(0,1);
-       respuesta += primerValorDniNie.toLowerCase();
-       let restoValoresDniNie = dniNie.slice(1,4);
-       respuesta += restoValoresDniNie;
+       respuesta += primeraLetra(apellidosSinEspacio).toUpperCase();;
+       respuesta += cuatroPrimerasLetra(apellidosSinEspacio);
+       respuesta += primeraLetra(dniNie).toLowerCase();
+       respuesta += cuatroPrimerasLetra(dniNie);
        userName.value = respuesta;
+
+       addClassValidInvalidInputs(userName,esValido);
+    }
+
+  });
+
+function primeraLetra(texto){
+  return texto.slice(0,1);
+}
+
+function cuatroPrimerasLetra(texto){
+  return texto.slice(1,4);
+}
+
+function validacionGeneral(element){
+  
+  $(`#${element.id}`).on('focusout', () => {
+    if(element.value === ''){
+      addClassValidInvalidInputs(element,!esValido,tipoError="vacio");
+    }else{
+      addClassValidInvalidInputs(element,esValido);
     }
   });
-  function validacionGeneral(element){
-    console.log(element.id)
-    var id = element.id;
-    let div = id;
-    let result = div.replace(/validation/, ""); 
-    let divFeedback = document.getElementById(`feedback${result}`);
-    let mensaje = "Este campo no puede estar vacio";
-    console.log(divFeedback);
-    element.addEventListener('focusout', ()=>{
-        if(element.value === ''){
-            element.classList.remove('is-valid');
-            element.classList.add('is-invalid');
-            divFeedback.innerHTML = mensaje;
-            divFeedback.classList.add('invalid-feedback');
-        }else{
-            element.classList.remove('is-invalid');
-            element.classList.add('is-valid');
-            divFeedback.innerHTML = " ";
-            divFeedback.classList.remove('invalid-feedback');
-            
-        }
-    });
-    element.addEventListener('input', ()=>{
-        if(element.value !== ''){
-            element.classList.remove('is-invalid');
-            element.classList.add('is-valid');
-            divFeedback.innerHTML = " ";
-            divFeedback.classList.remove('invalid-feedback');
-        }else{
-            element.classList.remove('is-valid');
-            element.classList.add('is-invalid'); 
-            divFeedback.innerHTML = mensaje;
-            divFeedback.classList.add('invalid-feedback');          
-        }
-    });
+
+  $(`#${element.id}`).on('input', ()=>{
+      if(element.value !== ''){
+          addClassValidInvalidInputs(element,esValido);
+      }else{
+          addClassValidInvalidInputs(element,!esValido,tipoError="vacio");         
+      }
+  });
 }
 //funcion que verifica por cada elemento y una funcion especifica
 function validarElemento(elemento, validador) {
-  var id = elemento.id;
-  let div = id;
-  let result = div.replace(/validation/, ""); 
-  let divFeedback = document.getElementById(`feedback${result}`);
-  let mensaje = "Este campo no puede estar vacio";
-
-  elemento.addEventListener('focusout', () => {
+  $(`#${elemento.id}`).on('focusout', () => {
     if (elemento.value === '') {
-      divFeedback.innerHTML = mensaje;
-      divFeedback.classList.add('invalid-feedback'); 
-      elemento.classList.add('is-invalid');
+      addClassValidInvalidInputs(elemento,!esValido,tipoError="vacio")
       return;
     }
   
     if (!validador(elemento.value)) {
-      divFeedback.innerHTML = "Error: revise el valor introducido";
-      divFeedback.classList.add('invalid-feedback'); 
-      elemento.classList.add('is-invalid');
+      addClassValidInvalidInputs(elemento,!esValido,tipoError="errorData")
     } else {
-      elemento.classList.remove('is-invalid');
-      elemento.classList.add('is-valid');
-      divFeedback.innerHTML = "";
+      addClassValidInvalidInputs(elemento,esValido)
     }
   });
   
-  elemento.addEventListener('input', () => {
+  $(`#${elemento.id}`).on('input', () => {
     if (elemento.value === '') {
-      divFeedback.innerHTML = mensaje;
-      divFeedback.classList.add('invalid-feedback'); 
-      elemento.classList.add('is-invalid');
+      addClassValidInvalidInputs(elemento,!esValido,tipoError="vacio")
       return;
     }
   
     if (!validador(elemento.value)) {
-      divFeedback.innerHTML = "Error: revise el valor introducido";
-      elemento.classList.add('is-invalid');
-      divFeedback.classList.add('invalid-feedback'); 
+      addClassValidInvalidInputs(elemento,!esValido,tipoError="errorData")
     } else {
-      elemento.classList.remove('is-invalid');
-      elemento.classList.add('is-valid');
-      divFeedback.innerHTML = "";
-      divFeedback.classList.remove('invalid-feedback'); 
+      addClassValidInvalidInputs(elemento,esValido)
+
     }
   });
 }
