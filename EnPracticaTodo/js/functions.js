@@ -1,11 +1,316 @@
+
+
   let inputs = document.querySelectorAll("input");
   let mensajeVacio = "Este campo no puede estar vacio";
   let mensajeError = "Error: revise el valor introducido"
+  let mensajeErrorMaps = "La dirección introducida no es válida"
+  let mensajeErrorSelect = "Error: debe seleccionar un valor"
   let esValido=true;
-  let tipoError="";
-  console.log(inputs);
+  let arrayErrores = ["vacio","errorData","errorMaps", "errorSelect"];
 
-  /*Realiza diversas verficaciones mientras el usuario ingresa los datos en cada input */
+
+  let selects = document.querySelectorAll("select");
+  let selectDistricte = document.getElementById('selectDistricte');
+  let selectBarri = document.getElementById('selectBarri');
+  let selectVia = document.getElementById('selectVia');
+  let selectPoblacion = document.getElementById('selectPoblacio');
+
+
+  let deflat= 41.390205;
+  let deflng= 2.154007;
+  let map;
+  let responseDiv;
+  let marker;
+
+  let direccion = "";
+  let nombreDireccion= "";
+  let numeroCalle= "";
+  let codigoPostal= "";
+  let via= "";
+  let txtBarri = "";
+  let txtPoblacion = "";
+  let txtDistrito = "";
+  let numeroPis = "";
+  let escalera = "";
+  let puerta = "";
+
+//#region Insert y previsualizacion
+
+
+$("#form-pisos-register").submit(function(event){
+
+  let formIsValid = true;
+
+  inputs.forEach(element  => {
+    if(element.type != "submit"){
+        if (element.value === '') {
+            addClassValidInvalidInputs(element,!esValido,arrayErrores[0]);
+            formIsValid = false;
+        } else {
+            addClassValidInvalidInputs(element,esValido);
+        }
+    }
+  });
+
+  selects.forEach((select)=>{
+    let value = $(`#${select.id}`).find("option:selected").text();
+    if(!checkSelect(value, select)){
+      formIsValid= false;
+    }
+  });
+
+  if (!formIsValid) {
+    event.preventDefault(); // Prevención del envío del formulario
+    return;
+  }
+
+  let formData = $(this).serialize();
+  let post = $.ajax({
+    method: "POST",
+    url: "insertData.php",
+    dataType: "json",
+    data: formData
+  });
+  
+  post.done( response => {
+    console.log("Respuesta del servidor:", response);
+  });
+  
+});
+
+
+
+$("#btnVisualizar").on("click", function(event){
+  event.preventDefault();
+  $("#nomPis").text($("#validationNom").val() + " "+txtBarri + " "+txtDistrito);
+  $("#dir").text(direccion +" - "+txtDistrito+" - " + txtBarri);
+  $("#preu").text($("#validationPreu").val() + " €");
+  $("#txtDescripcion").text($("#validationDescripcion").val());
+
+});
+
+function checkSelect(value, select){
+  if(value != "Open this select menu"){
+    addClassValidInvalidSelects(select, esValido);
+    return true;
+  }else{
+    addClassValidInvalidSelects(select, !esValido,arrayErrores[3]);
+    return false;
+  }
+}
+
+
+function addClassValidInvalidSelects(element, esValid,tipoMensaje){
+    if(esValid){
+      element.classList.remove('is-invalid');
+      element.classList.add('is-valid');
+      addClassFeedback(element,esValido)
+    }else{
+      element.classList.remove('is-valid');
+      element.classList.add('is-invalid');
+      
+      if(tipoMensaje == arrayErrores[3]){
+        addClassFeedback(element,!esValido,tipoMensaje)
+      }
+    }
+}
+
+//#endregion  
+
+//#region maps
+
+
+$('#validationNomDireccion').on('change', () => {
+  nombreDireccion = $('#validationNomDireccion').val();
+  concatenandoDireccion();
+});
+$('#validationNumeroCalle').on('change', () => {
+  numeroCalle = $('#validationNumeroCalle').val();
+  concatenandoDireccion();
+});
+$('#validationPis').on('change', () => {
+  numeroPis = $('#validationPis').val();
+  concatenandoDireccion();
+});
+$('#validationEscala').on('change', () => {
+  escalera = $('#validationEscala').val();
+  concatenandoDireccion();
+});
+$('#validationPorta').on('change', () => {
+  puerta = $('#validationPorta').val();
+  concatenandoDireccion();
+});
+$('#validationCP').on('change', () => {
+  codigoPostal = $('#validationCP').val();
+  concatenandoDireccion();
+  busquedaDireccionMaps();
+});
+
+
+function concatenandoDireccion(){
+  direccion = via + " "+nombreDireccion + 
+  " "+numeroCalle + " "+numeroPis+ " "+escalera+
+   " "+puerta+ " "+codigoPostal;
+  
+}
+
+function busquedaDireccionMaps(){
+  clear();
+  let inputMaps = document.getElementById('validationMaps');
+  let geocoder = new google.maps.Geocoder();
+        let address =`"${direccion}"`;
+        geocoder.geocode( { 'address': address}, function(results, status) {
+          responseDiv = document.createElement("div");
+            if (status == google.maps.GeocoderStatus.OK) {
+
+              latitude = results[0].geometry.location.lat();
+              document.getElementById('validationLatitud').value = latitude;
+
+              longitude = results[0].geometry.location.lng();
+              document.getElementById('validationLongitud').value = longitude;
+              
+              ubicacionEnMaps(latitude,longitude);
+              addClassValidInvalidInputs(inputMaps,esValido)
+            }else{
+              addClassValidInvalidInputs(inputMaps,!esValido,arrayErrores[2]);
+              document.getElementById('validationLatitud').value = "";
+              document.getElementById('validationLongitud').value = "";
+
+            }
+        });
+}
+
+  
+  //Funcion que recibe coordenadas para buscar en el maps
+  async function ubicacionEnMaps(latitude,longitude) {
+  const { Map } = await google.maps.importLibrary("maps");
+  const myLatLng = { lat: latitude, lng: longitude };
+  map = new Map(document.getElementById("map"), {
+    center: myLatLng,
+    zoom: 12,
+  });
+  
+  addMarker(myLatLng);
+  
+}
+
+  async function initMap() {
+  //@ts-ignore
+  const { Map } = await google.maps.importLibrary("maps");
+  const myLatLng = { lat: deflat, lng: deflng };
+  
+  map = new Map(document.getElementById("map"), {
+    center: { lat: deflat, lng: deflng },
+    zoom: 12,
+  });
+
+  addMarker(myLatLng);
+}
+
+function clear() {
+  marker.setMap(null);
+ // responseDiv.style.display = "none";
+}
+initMap();
+
+  //funcion que se encarga de añadir marKer (icono)
+  function addMarker(position){
+    marker = new google.maps.Marker({
+      position,
+      map,
+    });
+}
+//#endregion
+
+//#region consultas php
+
+
+$('#selectBarri').prop("disabled", true);
+$('#validationLatitud').prop("disabled", true);
+$('#validationLongitud').prop("disabled", true);
+
+var request = $.ajax({
+  method: "GET",
+  url: "districtes.php",
+  dataType: "json"
+});
+
+request.done( data => {
+  data.forEach( districte =>{
+      createOptions(districte,selectDistricte)
+  });
+});
+
+
+$.ajax({
+  method: "GET",
+  url: "vias.php",
+  dataType: "json"
+}).done( data => {
+  data.forEach(via =>{
+    createOptions(via, selectVia);
+  })
+
+});
+
+$(`#selectVia`).on( "change", function() {
+  via = $(this).find("option:selected").text();
+  checkSelect(via, selectVia);
+  concatenandoDireccion();
+});
+
+$(`#selectBarri`).on( "change", function() {
+  let idBarri = $( this ).val();
+  txtBarri = $(this).find("option:selected").text();
+    checkSelect(idBarri,selectBarri);
+});
+$(`#selectPoblacio`).on( "change", function() {
+  let idPoblacion = $( this ).val();
+  
+  txtPoblacion = $(this).find("option:selected").text();
+    checkSelect(idPoblacion,selectPoblacion);
+});
+$(`#selectDistricte`).on( "change", function() {
+    let idDistricte = $( this ).val();
+    txtDistrito = $(this).find("option:selected").text();
+    checkSelect(idDistricte, selectDistricte);
+    if(idDistricte > 0 ){
+      $('#selectBarri').prop("disabled", false);
+      queryGetBarris(idDistricte);
+    
+    }else{
+      $('#selectBarri').prop("disabled", true);
+    }
+  });
+
+function createOptions(data, select){
+    //creamos los elementos de option
+   
+    let opt = document.createElement('option');
+    opt.value = data.id;
+    opt.text = data.name;
+    //añadimos dentro del select
+    select.appendChild(opt);
+}
+
+function queryGetBarris(idSeleccionado){
+  $.ajax({
+    method: "POST",
+    url: "barris.php",
+    data: { id : idSeleccionado},
+    dataType: "json"
+  }).done( data => {
+    data.forEach(barri =>{
+      createOptions(barri, selectBarri);
+    })
+  
+  });
+}
+
+//#endregion
+
+//#region verificacion inputs
+/*Realiza diversas verficaciones mientras el usuario ingresa los datos en cada input */
 inputs.forEach((element)=>{
   if(element.type != "submit"){
       switch (element.id){
@@ -23,6 +328,7 @@ inputs.forEach((element)=>{
       }
   }
 });
+
 function addClassValidInvalidInputs(element, esValid,tipoMensaje){
 
   if(esValid){
@@ -32,64 +338,76 @@ function addClassValidInvalidInputs(element, esValid,tipoMensaje){
   }else{
     element.classList.remove('is-valid');
     element.classList.add('is-invalid');
-    
-    if(tipoMensaje == "vacio"){
-      addClassFeedback(element,!esValido,tipoMensaje)
-    }else if(tipoMensaje == "errorData"){
-      addClassFeedback(element,!esValido,tipoMensaje)
-    }
-    
+
+    addClassFeedback(element,!esValido,tipoMensaje)
     
   }
 }
 
 function addClassFeedback(element,esValid,tipoMensaje){
- // console.log(element)
+  
   let id = element.id;
   let div = id;
-  let result = div.replace(/validation/, ""); 
-  let divFeedback = document.getElementById(`feedback${result}`);
-//console.log(divFeedback)
+  let divFeedback = "";
+
+  if(div.includes('validation')){
+    let result = div.replace(/validation/, ""); 
+    divFeedback = document.getElementById(`feedback${result}`);
+  }else if(div.includes('select')){
+    let result = div.replace(/select/, ""); 
+    divFeedback = document.getElementById(`feedback${result}`);
+  }else{
+    divFeedback = document.getElementById(`${div}`)
+  }
+
   if(esValid){
     divFeedback.innerHTML = "";
     divFeedback.classList.remove('invalid-feedback');
   }else{
     divFeedback.classList.add('invalid-feedback');
     switch (tipoMensaje){
-      case "vacio":
+      case arrayErrores[0]:
            divFeedback.innerHTML = mensajeVacio;
       break;
-      case "errorData":
+      case arrayErrores[1]:
             divFeedback.innerHTML = mensajeError;
+      break;
+      case arrayErrores[2]:
+            divFeedback.innerHTML = mensajeErrorMaps;
+      break;
+      case arrayErrores[3]:
+            divFeedback.innerHTML = mensajeErrorSelect;
       break;
     }
   }
   
 }
+
+
   $('#form-user-register').submit(function(e) {
     e.preventDefault();
 
     inputs.forEach(element  => {
       if(element.type != "submit"){
           if (element.value === '') {
-              addClassValidInvalidInputs(element,!esValido,tipoError="vacio");
+              addClassValidInvalidInputs(element,!esValido,arrayErrores[0]);
           } else {
               addClassValidInvalidInputs(element,esValido);
               switch (element.id){
                 case "validationEmail" :
                   (validateEmail(element.value))
                   ?addClassValidInvalidInputs(element,esValido)
-                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                  :addClassValidInvalidInputs(element,!esValido,arrayErrores[1]);
                 break;
                 case "validationDNI":
                   (validateNIF_NIE(element.value))
                   ?addClassValidInvalidInputs(element,esValido)
-                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                  :addClassValidInvalidInputs(element,!esValido,arrayErrores[1]);
                 break;
                 case "validationTelf":
                   (validateTelefono(element.value))
                   ?addClassValidInvalidInputs(element,esValido)
-                  :addClassValidInvalidInputs(element,!esValido,tipoError="errorData");
+                  :addClassValidInvalidInputs(element,!esValido,arrayErrores[1]);
                 break;
             }
           }
@@ -137,7 +455,7 @@ function validacionGeneral(element){
   
   $(`#${element.id}`).on('focusout', () => {
     if(element.value === ''){
-      addClassValidInvalidInputs(element,!esValido,tipoError="vacio");
+      addClassValidInvalidInputs(element,!esValido,arrayErrores[0]);
     }else{
       addClassValidInvalidInputs(element,esValido);
     }
@@ -147,7 +465,7 @@ function validacionGeneral(element){
       if(element.value !== ''){
           addClassValidInvalidInputs(element,esValido);
       }else{
-          addClassValidInvalidInputs(element,!esValido,tipoError="vacio");         
+          addClassValidInvalidInputs(element,!esValido,arrayErrores[0]);         
       }
   });
 }
@@ -155,12 +473,12 @@ function validacionGeneral(element){
 function validarElemento(elemento, validador) {
   $(`#${elemento.id}`).on('focusout', () => {
     if (elemento.value === '') {
-      addClassValidInvalidInputs(elemento,!esValido,tipoError="vacio")
+      addClassValidInvalidInputs(elemento,!esValido,arrayErrores[0])
       return;
     }
   
     if (!validador(elemento.value)) {
-      addClassValidInvalidInputs(elemento,!esValido,tipoError="errorData")
+      addClassValidInvalidInputs(elemento,!esValido,arrayErrores[1])
     } else {
       addClassValidInvalidInputs(elemento,esValido)
     }
@@ -168,12 +486,12 @@ function validarElemento(elemento, validador) {
   
   $(`#${elemento.id}`).on('input', () => {
     if (elemento.value === '') {
-      addClassValidInvalidInputs(elemento,!esValido,tipoError="vacio")
+      addClassValidInvalidInputs(elemento,!esValido,arrayErrores[0])
       return;
     }
   
     if (!validador(elemento.value)) {
-      addClassValidInvalidInputs(elemento,!esValido,tipoError="errorData")
+      addClassValidInvalidInputs(elemento,!esValido,arrayErrores[1])
     } else {
       addClassValidInvalidInputs(elemento,esValido)
 
@@ -208,3 +526,5 @@ function validateEmail(mail) {
 function validateTelefono(telefono){
   return /^\d{9}$/.test(telefono)
 }
+
+//#endregion
