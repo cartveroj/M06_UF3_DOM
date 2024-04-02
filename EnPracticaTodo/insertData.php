@@ -1,5 +1,9 @@
 <?php 
+
 include "conecction.php";
+
+    /*Lógica php que se encarga de realizar el insert de los datos enviados*/
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Verificar si los campos esperados están presentes en $_POST

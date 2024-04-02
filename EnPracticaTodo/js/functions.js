@@ -1,4 +1,6 @@
+//Logica de javaScript de validacion de formularios, manejo de maps, persistencia en base de datos, metodos AJAX, etc
 
+//Declaracion de variables globales
 
   let inputs = document.querySelectorAll("input");
   let mensajeVacio = "Este campo no puede estar vacio";
@@ -14,7 +16,6 @@
   let selectBarri = document.getElementById('selectBarri');
   let selectVia = document.getElementById('selectVia');
   let selectPoblacion = document.getElementById('selectPoblacio');
-
 
   let deflat= 41.390205;
   let deflng= 2.154007;
@@ -36,7 +37,8 @@
 
 //#region Insert y previsualizacion
 
-
+//revisamos todos los inputs y selects en el momento que 
+//el usuario quiere hacer submit el formulario
 $("#form-pisos-register").submit(function(event){
 
   let formIsValid = true;
@@ -64,6 +66,7 @@ $("#form-pisos-register").submit(function(event){
     return;
   }
 
+  //envia los datos del form al archivo php para realizar el insert
   let formData = $(this).serialize();
   let post = $.ajax({
     method: "POST",
@@ -79,7 +82,7 @@ $("#form-pisos-register").submit(function(event){
 });
 
 
-
+//Previsualiza los datos del formulario 
 $("#btnVisualizar").on("click", function(event){
   event.preventDefault();
   $("#nomPis").text($("#validationNom").val() + " "+txtBarri + " "+txtDistrito);
@@ -89,6 +92,7 @@ $("#btnVisualizar").on("click", function(event){
 
 });
 
+//funcion que revisa que los select hayan sido seleccionados 
 function checkSelect(value, select){
   if(value != "Open this select menu"){
     addClassValidInvalidSelects(select, esValido);
@@ -99,7 +103,8 @@ function checkSelect(value, select){
   }
 }
 
-
+//funcion que se encarga de añadir las clases de validaciones 
+//a los selects si cumplen ciertos criterios
 function addClassValidInvalidSelects(element, esValid,tipoMensaje){
     if(esValid){
       element.classList.remove('is-invalid');
@@ -119,6 +124,7 @@ function addClassValidInvalidSelects(element, esValid,tipoMensaje){
 
 //#region maps
 
+//recupera los datos del formulario para armar la direccion
 
 $('#validationNomDireccion').on('change', () => {
   nombreDireccion = $('#validationNomDireccion').val();
@@ -146,16 +152,17 @@ $('#validationCP').on('change', () => {
   busquedaDireccionMaps();
 });
 
-
+//Concatena los valores del formalario
 function concatenandoDireccion(){
   direccion = via + " "+nombreDireccion + 
   " "+numeroCalle + " "+numeroPis+ " "+escalera+
    " "+puerta+ " "+codigoPostal;
   
 }
-
+//Funcion que se encarga de realziar la busqueda de la direccion 
+//introducida por el usuario
 function busquedaDireccionMaps(){
-  clear();
+  clear(); //limpiamos la busqueda anterior
   let inputMaps = document.getElementById('validationMaps');
   let geocoder = new google.maps.Geocoder();
         let address =`"${direccion}"`;
@@ -169,7 +176,7 @@ function busquedaDireccionMaps(){
               longitude = results[0].geometry.location.lng();
               document.getElementById('validationLongitud').value = longitude;
               
-              ubicacionEnMaps(latitude,longitude);
+              ubicacionEnMaps(latitude,longitude); //enviamos los datos 
               addClassValidInvalidInputs(inputMaps,esValido)
             }else{
               addClassValidInvalidInputs(inputMaps,!esValido,arrayErrores[2]);
@@ -193,7 +200,7 @@ function busquedaDireccionMaps(){
   addMarker(myLatLng);
   
 }
-
+ //funcion principal que inicia el maps
   async function initMap() {
   //@ts-ignore
   const { Map } = await google.maps.importLibrary("maps");
@@ -206,10 +213,9 @@ function busquedaDireccionMaps(){
 
   addMarker(myLatLng);
 }
-
+//funcion que limpiar el marker del mapa
 function clear() {
   marker.setMap(null);
- // responseDiv.style.display = "none";
 }
 initMap();
 
@@ -224,11 +230,12 @@ initMap();
 
 //#region consultas php
 
-
+//deshabilitamos algunas opciones del formulario
 $('#selectBarri').prop("disabled", true);
 $('#validationLatitud').prop("disabled", true);
 $('#validationLongitud').prop("disabled", true);
 
+//recupera los datos de distrito a traves del metodo Ajax
 var request = $.ajax({
   method: "GET",
   url: "districtes.php",
@@ -237,11 +244,11 @@ var request = $.ajax({
 
 request.done( data => {
   data.forEach( districte =>{
-      createOptions(districte,selectDistricte)
+      createOptions(districte,selectDistricte) //enviamos los datos recuperados para crear los elementos en la vista
   });
 });
 
-
+//recuperamos los datos de via a traves del metodo AJAX
 $.ajax({
   method: "GET",
   url: "vias.php",
@@ -253,6 +260,7 @@ $.ajax({
 
 });
 
+//recupera el valor del select y verifica que haya sido seleccionado con la funcion chackSelect
 $(`#selectVia`).on( "change", function() {
   via = $(this).find("option:selected").text();
   checkSelect(via, selectVia);
@@ -283,8 +291,8 @@ $(`#selectDistricte`).on( "change", function() {
     }
   });
 
+//funcion que crea los elementos de option
 function createOptions(data, select){
-    //creamos los elementos de option
    
     let opt = document.createElement('option');
     opt.value = data.id;
@@ -293,6 +301,7 @@ function createOptions(data, select){
     select.appendChild(opt);
 }
 
+//funcion que recupera los elementos de barri segun el distrito seleccionado
 function queryGetBarris(idSeleccionado){
   $.ajax({
     method: "POST",
@@ -310,6 +319,7 @@ function queryGetBarris(idSeleccionado){
 //#endregion
 
 //#region verificacion inputs
+
 /*Realiza diversas verficaciones mientras el usuario ingresa los datos en cada input */
 inputs.forEach((element)=>{
   if(element.type != "submit"){
@@ -329,6 +339,8 @@ inputs.forEach((element)=>{
   }
 });
 
+//funcion que se en carga de añadir clases de validacion a los inputs
+//siguiendo ciertos criterios de validacion
 function addClassValidInvalidInputs(element, esValid,tipoMensaje){
 
   if(esValid){
@@ -343,7 +355,8 @@ function addClassValidInvalidInputs(element, esValid,tipoMensaje){
     
   }
 }
-
+//Funcion que se encarga de añadir clases de validacion 
+//al div de Feedback y enseña mensajes de error segun el tipo de error
 function addClassFeedback(element,esValid,tipoMensaje){
   
   let id = element.id;
@@ -383,9 +396,9 @@ function addClassFeedback(element,esValid,tipoMensaje){
   
 }
 
-
+//Verifica el formulario de User cuando el usuario quiere realizar submit 
   $('#form-user-register').submit(function(e) {
-    e.preventDefault();
+    e.preventDefault(); 
 
     inputs.forEach(element  => {
       if(element.type != "submit"){
@@ -416,10 +429,12 @@ function addClassFeedback(element,esValid,tipoMensaje){
 
   });
 
+  // modifica el diseño del cursor 
   $('#btnUsername').on('mouseover', () => {
     $('#btnUsername').css('cursor', 'pointer');
   });
 
+  //genera un user hacienco click a username
   $('#btnUsername').on('click', () => {
 
     let nom = $('#validationNom').val();
@@ -443,13 +458,16 @@ function addClassFeedback(element,esValid,tipoMensaje){
 
   });
 
+  //funcion que retorna la primera letra de un string
 function primeraLetra(texto){
   return texto.slice(0,1);
 }
+  //funcion que retorna las cuatro letras siguientes de la primera letra de un string
 
 function cuatroPrimerasLetra(texto){
   return texto.slice(1,4);
 }
+  //funcion que valida los inputs que no tienen una validacion especifica
 
 function validacionGeneral(element){
   
@@ -498,6 +516,8 @@ function validarElemento(elemento, validador) {
     }
   });
 }
+
+//funcion que valida que NIE/NiF/DNI
   function validateNIF_NIE(value){
     var validChars = 'TRWAGMYFPDXBNJZSQVHLCKET';
     var nifRexp = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKET]{1}$/i;
@@ -519,10 +539,12 @@ function validarElemento(elemento, validador) {
     return false;
   }
 
-
+//funcion que valida el email
 function validateEmail(mail) {   
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail);
 }
+//funcion que valida el valor de telefono
+
 function validateTelefono(telefono){
   return /^\d{9}$/.test(telefono)
 }

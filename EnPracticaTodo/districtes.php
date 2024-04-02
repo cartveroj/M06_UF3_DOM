@@ -1,5 +1,5 @@
 <?php 
-    /*Lógica php que retorna en formato json los valores de la tabla de categoria*/
+    /*Lógica php que retorna en formato json los valores de la tabla de districtes*/
     include "conecction.php";
     $cat = " SELECT * FROM `districtes`";
 

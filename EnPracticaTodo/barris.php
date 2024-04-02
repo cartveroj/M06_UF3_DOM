@@ -1,5 +1,5 @@
 <?php 
-    /*Lógica php que retorna en formato json los valores de la tabla de categoria*/
+    /*Lógica php que retorna en formato json los valores de la tabla de barris*/
     include "conecction.php";
     $id_districte = $_POST['id'];
     $query = " SELECT * FROM `barris` WHERE `id_districte` = $id_districte ORDER BY id asc";
